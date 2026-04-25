@@ -1,0 +1,39 @@
+# ACC102 Track4 - Financial Analysis Workflow
+## Data Source: WRDS Compustat
+## Analysis: Corporate Financial Health Comparison
+
+import wrds
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Connect WRDS
+conn = wrds.Connection()
+
+# Query data
+def get_data(ticker, start, end):
+    query = f"""
+        SELECT fyear, revt, ni, at, act, lct, lt
+        FROM comp.funda
+        WHERE tic = '{ticker}'
+        AND fyear BETWEEN {start} AND {end}
+    """
+    return conn.raw_sql(query)
+
+# Get AAPL and MSFT data
+df1 = get_data("AAPL", 2016, 2024)
+df2 = get_data("MSFT", 2016, 2024)
+
+# Calculate ratios
+def ratios(df):
+    df["ROE"] = df["ni"] / (df["at"] - df["lt"])
+    df["Current_Ratio"] = df["act"] / df["lct"]
+    return df
+
+df1 = ratios(df1)
+df2 = ratios(df2)
+
+# Show results
+print("AAPL")
+print(df1)
+print("MSFT")
+print(df2)
